@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { ICliente } from "@/hooks/useClientes";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
-import { PolizasDialog } from "../Dialogs/PolizasDialog";
 import BienesDialog from "../Dialogs/BienesDialog";
+import DatosDialog from "../Dialogs/DatosDialog";
+import PolizasDialog from "../Dialogs/PolizasDialog";
+import EstadoDialog from "../Dialogs/EstadoDialog";
 
 export const createColumns = (
   onDataUpdate: (updatedItem: ICliente) => void
@@ -74,8 +76,8 @@ export const createColumns = (
         <div className="flex gap-2">
           <PolizasDialog clienteData={row.original} />
           <BienesDialog clienteData={row.original} />
-          {/* <DialogDatos data={row.original} onDataUpdate={onDataUpdate} />
-          <ToggleStatus data={row.original} onDataUpdate={onDataUpdate} /> */}
+          <DatosDialog clientData={row.original} onDataUpdate={onDataUpdate} />
+          <EstadoDialog clientData={row.original} onDataUpdate={onDataUpdate} />
         </div>
       );
     },

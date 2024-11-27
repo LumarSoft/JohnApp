@@ -4,9 +4,14 @@ import { createColumns } from "./components/Table/columns";
 import { DataTable } from "./components/Table/DataTable";
 
 export default function Clientes() {
-  const { clientes, error, loading } = useClientes();
+  const { clientes, error, loading, setClientes } = useClientes();
 
-  const handleUpdate = (updatedItem: ICliente) => {};
+  const handleUpdate = (updatedItem: ICliente) => {
+    const updatedClientes = clientes.map((cliente) =>
+      cliente.dni === updatedItem.dni ? updatedItem : cliente
+    );
+    setClientes(updatedClientes);
+  };
 
   const columns = createColumns(handleUpdate);
 

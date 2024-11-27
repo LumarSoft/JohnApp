@@ -5,11 +5,11 @@ export interface ICliente {
   dni: string;
   nya_razonsocial: string;
   cuit: string;
-  localidad: null;
+  localidad: string;
   celular: string;
-  direccion: null;
+  direccion: string;
   email: string;
-  agenda: null;
+  agenda: string;
   estado: string;
 }
 
@@ -36,7 +36,7 @@ const useClientes = () => {
     fetchClientes();
   }, []);
 
-  return { clientes, loading, error };
+  return { clientes, loading, error, setClientes };
 };
 
 export default useClientes;

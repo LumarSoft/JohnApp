@@ -21,7 +21,7 @@ import { ICliente } from "@/hooks/useClientes";
 import usePolizas, { IPoliza } from "@/hooks/usePolizas";
 import { useState } from "react";
 
-export const PolizasDialog = ({ clienteData }: { clienteData: ICliente }) => {
+ const PolizasDialog = ({ clienteData }: { clienteData: ICliente }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { polizas, loading, error } = usePolizas(clienteData.dni, isDialogOpen);
   const [selectedPoliza, setSelectedPoliza] = useState<IPoliza | null>(null);
@@ -113,3 +113,5 @@ export const PolizasDialog = ({ clienteData }: { clienteData: ICliente }) => {
     </Dialog>
   );
 };
+
+export default PolizasDialog;

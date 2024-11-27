@@ -20,7 +20,10 @@ const usePolizas = (dniClient: string, isDialogOpen: boolean) => {
       setLoading(true);
       setError(null);
 
-      const response = await apiService.getById("policies/:id", Number(dniClient));
+      const response = await apiService.getById(
+        "policies/:id",
+        Number(dniClient)
+      );
       if (response.ok) {
         setPolizas(response.data || []);
       } else {
