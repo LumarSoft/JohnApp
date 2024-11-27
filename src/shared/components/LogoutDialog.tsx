@@ -11,34 +11,19 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 
 export const LogoutDialog = () => {
   const router = useRouter();
+  const { logout } = useAuth(); // Usa el hook de logout que creamos anteriormente
 
   const handleLogout = async () => {
-    try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    // Llamar al método logout del hook
+    logout();
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Redirigir a la página de inicio de sesión
-        router.push(data.redirectUrl);
-      } else {
-        // Manejar error de logout
-        console.error("Error de logout:", data.error);
-        // Podrías mostrar un toast o mensaje de error
-      }
-    } catch (error) {
-      console.error("Error durante el logout:", error);
-      // Manejar errores de red
-    }
+    // Redirigir a la página de inicio de sesión
+    router.push("/");
   };
 
   return (

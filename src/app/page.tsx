@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { apiService } from "@/services/querys"; // Asegúrate de que el servicio esté configurado
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
 
 // Seeded random number generator para animaciones consistentes
 const mulberry32 = (a: number) => {
@@ -24,51 +25,45 @@ const InnovativeLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { login } = useAuth();
 
-  // Manejar inicio de sesión
-  const handleLogin = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+const handleLogin = async (e: React.SyntheticEvent) => {
+  e.preventDefault();
 
-    // Validaciones simples
-    if (!email || !password) {
-      setError("Por favor, ingrese su email y contraseña");
-      return;
+  // Validaciones simples
+  if (!email || !password) {
+    setError("Por favor, ingrese su email y contraseña");
+    return;
+  }
+
+  if (!email.includes("@")) {
+    setError("Por favor, ingrese un email válido");
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  try {
+    // Realizar autenticación
+    const response = await apiService.create("users/login", {
+      email,
+      password,
+    });
+
+    // Validamos si la respuesta es correcta
+    if (response.statusCode === 200) {
+      // Pasar toda la respuesta al login
+      await login(response);
+      router.push("/botwhatsapp");
     }
-
-    if (!email.includes("@")) {
-      setError("Por favor, ingrese un email válido");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Llamada al servicio API
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Login exitoso
-        router.push(data.redirectUrl);
-      } else {
-        // Error de autenticación
-        setError(data.error || "Error de autenticación");
-      }
-    } catch (error) {
-      console.error("Error durante la autenticación:", error);
-      setError("Ocurrió un error inesperado. Por favor, inténtelo de nuevo.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error("Error durante la autenticación:", error);
+    setError("Ocurrió un error inesperado. Por favor, inténtelo de nuevo.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Alternar visibilidad de la contraseña
   const togglePasswordVisibility = () => {
