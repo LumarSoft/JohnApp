@@ -18,7 +18,7 @@ import { Link } from "next-view-transitions";
 const items = [
   {
     title: "QR WhatsApp",
-    url: "botWhatsApp",
+    url: "botwhatsapp",
     icon: Home,
   },
   {

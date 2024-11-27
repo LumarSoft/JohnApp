@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { LoadingPage } from "./LoadingPage";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -38,7 +39,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Mostrar un indicador de carga mientras se verifica
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return <LoadingPage />;
   }
 
   // Si no está autenticado, no mostrar nada
