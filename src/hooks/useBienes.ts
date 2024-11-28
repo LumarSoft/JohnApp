@@ -15,18 +15,16 @@ export interface IBien {
   actividad?: string;
   ubicacion?: string;
   tipo_contrato?: string;
-  dni_asegurado?: string;
+  dni_asegurado: string;
   monto: number;
 }
 
-const useBienes = (dniClient: string, isDialogOpen: boolean) => {
+const useBienes = (dniClient: string) => {
   const [bienes, setBienes] = useState<IBien[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchPolizas = useCallback(async () => {
-    if (!isDialogOpen) return;
-
     try {
       setLoading(true);
       setError(null);
@@ -43,13 +41,13 @@ const useBienes = (dniClient: string, isDialogOpen: boolean) => {
     } finally {
       setLoading(false);
     }
-  }, [dniClient, isDialogOpen]);
+  }, [dniClient]);
 
   useEffect(() => {
     fetchPolizas();
   }, [fetchPolizas]);
 
-  return { bienes, loading, error };
+  return { bienes, loading, error, setBienes };
 };
 
 export default useBienes;

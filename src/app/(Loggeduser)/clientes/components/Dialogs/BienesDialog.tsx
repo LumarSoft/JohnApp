@@ -21,51 +21,109 @@ import {
 } from "@/components/ui/select";
 import { ICliente } from "@/hooks/useClientes";
 import useBienes, { IBien } from "@/hooks/useBienes";
+import { apiService } from "@/services/querys";
 
-const initialBienState: IBien = {
-  id_bien: 0,
+const initialBienState: Omit<IBien, "id_bien"> = {
   marca: "",
   modelo: "",
-  patente: "",
   anio: 0,
   cobertura: "",
-  monto: 0,
-  accesorios: "",
   adicionales: "",
+  accesorios: "",
+  dni_asegurado: "",
+  monto: 0,
 };
 
 const BienesDialog = ({ clienteData }: { clienteData: ICliente }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { bienes, error, loading } = useBienes(clienteData.dni, isDialogOpen);
+  const { bienes, error, loading, setBienes } = useBienes(
+    clienteData.dni,
+    isDialogOpen
+  );
   const [bienSeleccionado, setBienSeleccionado] = useState<IBien | null>(null);
-  const [formState, setFormState] = useState<IBien>(initialBienState);
+  const [formState, setFormState] =
+    useState<Omit<IBien, "id_bien">>(initialBienState);
 
   useEffect(() => {
     if (bienSeleccionado) {
-      setFormState(bienSeleccionado);
+      const { id_bien, ...rest } = bienSeleccionado || {};
+      setFormState({
+        ...rest,
+      });
     }
   }, [bienSeleccionado]);
 
-  const handleChange = (key: keyof IBien, value: string | number) => {
+  const handleChange = (
+    key: keyof Omit<IBien, "id_bien">,
+    value: string | number
+  ) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   };
 
   const changeSeleccionado = (value: string) => {
     if (value === "Agregar nuevo bien") {
-      setBienSeleccionado(initialBienState);
+      setBienSeleccionado(null);
+      setFormState(initialBienState);
     } else {
       const bien = bienes.find((bien) => bien.modelo === value) || null;
       setBienSeleccionado(bien);
     }
   };
 
-  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Lógica para guardar el bien
+
+    try {
+      if (!bienSeleccionado) {
+        const result = await apiService.create("goods", formState);
+        console.log(result);
+        if (result.message === "Bien agregado") {
+          const nuevoBien: IBien = {
+            ...formState,
+            id_bien: result.data.id_bien, // Recibe el id generado por la base de datos
+          };
+          setBienes((prevBienes) => [...prevBienes, nuevoBien]);
+          setBienSeleccionado(nuevoBien);
+        }
+      } else {
+        const result = await apiService.update(
+          `bienes/updateBien/:id`,
+          bienSeleccionado.id_bien,
+          formState
+        );
+        if (result.message === "Datos actualizados") {
+          setBienes((prevBienes) =>
+            prevBienes.map((bien) =>
+              bien.id_bien === bienSeleccionado.id_bien
+                ? { ...formState, id_bien: bien.id_bien }
+                : bien
+            )
+          );
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleDelete = () => {
-    // Lógica para eliminar el bien
+  const handleDelete = async () => {
+    if (!bienSeleccionado) return;
+
+    try {
+      const result = await apiService.delete(
+        `bienes/:id`,
+        bienSeleccionado.id_bien
+      );
+
+      if (result.ok) {
+        setBienes((prevBienes) =>
+          prevBienes.filter((bien) => bien.id_bien !== bienSeleccionado.id_bien)
+        );
+        setBienSeleccionado(null);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -110,11 +168,13 @@ const BienesDialog = ({ clienteData }: { clienteData: ICliente }) => {
                 <Label key={key} className="block mt-2">
                   {key.charAt(0).toUpperCase() + key.slice(1)}
                   <Input
-                    value={formState[key as keyof IBien] || ""}
+                    value={
+                      formState[key as keyof typeof initialBienState] || ""
+                    }
                     type={key === "anio" || key === "monto" ? "number" : "text"}
                     onChange={(e) =>
                       handleChange(
-                        key as keyof IBien,
+                        key as keyof typeof initialBienState,
                         key === "anio" || key === "monto"
                           ? Number(e.target.value)
                           : e.target.value

@@ -18,22 +18,22 @@ import { Link } from "next-view-transitions";
 const items = [
   {
     title: "QR WhatsApp",
-    url: "botwhatsapp",
+    url: "/botwhatsapp",
     icon: Home,
   },
   {
     title: "Rechazos",
-    url: "rechazos",
+    url: "/rechazos",
     icon: CircleX,
   },
   {
     title: "Clientes",
-    url: "clientes",
+    url: "/clientes",
     icon: Users,
   },
   {
     title: "Usuarios",
-    url: "usuarios",
+    url: "/usuarios",
     icon: User,
   },
 ];
