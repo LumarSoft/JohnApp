@@ -21,7 +21,7 @@ import { ICliente } from "@/hooks/useClientes";
 import usePolizas, { IPoliza } from "@/hooks/usePolizas";
 import { useState } from "react";
 
- const PolizasDialog = ({ clienteData }: { clienteData: ICliente }) => {
+const PolizasDialog = ({ clienteData }: { clienteData: ICliente }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { polizas, loading, error } = usePolizas(clienteData.dni, isDialogOpen);
   const [selectedPoliza, setSelectedPoliza] = useState<IPoliza | null>(null);
@@ -68,14 +68,28 @@ import { useState } from "react";
             <Label>Certificado</Label>
             <Input value={selectedPoliza?.certificado || ""} readOnly />
 
+            <Label>Fecha desde</Label>
+            <Input
+              value={selectedPoliza?.date_from?.toLocaleDateString() || ""}
+              readOnly
+            />
+            <Label>Fecha hasta</Label>
+            <Input
+              value={selectedPoliza?.date_to?.toLocaleDateString() || ""}
+              readOnly
+            />
+
             <Label>Articulo</Label>
             <Input
               value={selectedPoliza?.articulo || ""}
               onChange={(e) =>
-                setSelectedPoliza((prev) => ({
-                  ...prev,
-                  articulo: e.target.value,
-                } as IPoliza))
+                setSelectedPoliza(
+                  (prev) =>
+                    ({
+                      ...prev,
+                      articulo: e.target.value,
+                    } as IPoliza)
+                )
               }
             />
 
@@ -83,10 +97,13 @@ import { useState } from "react";
             <Input
               value={selectedPoliza?.descripcion || ""}
               onChange={(e) =>
-                setSelectedPoliza((prev) => ({
-                  ...prev,
-                  descripcion: e.target.value,
-                } as IPoliza))
+                setSelectedPoliza(
+                  (prev) =>
+                    ({
+                      ...prev,
+                      descripcion: e.target.value,
+                    } as IPoliza)
+                )
               }
             />
 
@@ -94,10 +111,13 @@ import { useState } from "react";
             <Input
               value={selectedPoliza?.rama || ""}
               onChange={(e) =>
-                setSelectedPoliza((prev) => ({
-                  ...prev,
-                  rama: e.target.value,
-                } as IPoliza))
+                setSelectedPoliza(
+                  (prev) =>
+                    ({
+                      ...prev,
+                      rama: e.target.value,
+                    } as IPoliza)
+                )
               }
             />
           </form>

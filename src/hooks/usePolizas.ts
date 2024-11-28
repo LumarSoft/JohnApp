@@ -6,6 +6,8 @@ export interface IPoliza {
   articulo: string;
   descripcion: string;
   rama: string;
+  date_from: Date;
+  date_to: Date;
 }
 
 const usePolizas = (dniClient: string, isDialogOpen: boolean) => {
