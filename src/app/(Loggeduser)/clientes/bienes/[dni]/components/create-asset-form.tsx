@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,39 +12,42 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
-  tipo_bien: z.string().optional(),
-  marca: z.string().min(1, "La marca es requerida"),
-  modelo: z.string().min(1, "El modelo es requerido"),
-  anio: z.string().min(4, "El año debe tener 4 dígitos"),
-  patente: z.string().optional(),
-  cobertura: z.string().min(1, "La cobertura es requerida"),
+  tipo_bien: z.string().default(""),
+  marca: z.string().default(""),
+  modelo: z.string().default(""),
+  anio: z.string().default(""),
+  patente: z.string().default(""),
+  cobertura: z.string().default(""),
   monto: z.string().min(1, "El monto es requerido"),
   adicionales: z.string().default("0"),
   accesorios: z.string().default("0"),
-})
+});
 
-export function CreateAssetForm({ onSubmit, onCancel }: { 
-  onSubmit: (values: z.infer<typeof formSchema>) => void
-  onCancel: () => void 
+export function CreateAssetForm({
+  onSubmit,
+  onCancel,
+}: {
+  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  onCancel: () => void;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      tipo_bien: "",
+      marca: "",
+      modelo: "",
+      anio: "",
+      patente: "",
+      cobertura: "",
+      monto: "",
       adicionales: "0",
       accesorios: "0",
     },
-  })
+  });
 
   return (
     <Form {...form}>
@@ -55,18 +58,9 @@ export function CreateAssetForm({ onSubmit, onCancel }: {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Bien</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione el tipo de bien" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="4-AUTOS">Autos</SelectItem>
-                  <SelectItem value="MOTO">Motos</SelectItem>
-                  <SelectItem value="CASA">Casa</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <Input placeholder="Tipo de bien" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -107,7 +101,7 @@ export function CreateAssetForm({ onSubmit, onCancel }: {
               <FormItem>
                 <FormLabel>Año</FormLabel>
                 <FormControl>
-                  <Input placeholder="Año" {...field} />
+                  <Input placeholder="Año" {...field} type="number" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,18 +127,11 @@ export function CreateAssetForm({ onSubmit, onCancel }: {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cobertura</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione la cobertura" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="D3">D3</SelectItem>
-                  <SelectItem value="C">C</SelectItem>
-                  <SelectItem value="B">B</SelectItem>
-                </SelectContent>
-              </Select>
+
+              <FormControl>
+                <Input placeholder="Cobertura" {...field} />
+              </FormControl>
+
               <FormMessage />
             </FormItem>
           )}
@@ -198,6 +185,5 @@ export function CreateAssetForm({ onSubmit, onCancel }: {
         </div>
       </form>
     </Form>
-  )
+  );
 }
-

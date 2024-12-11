@@ -14,21 +14,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const formSchema = z.object({
-  tipo_bien: z.string().min(1, "El tipo de bien es requerido"),
-  marca: z.string().min(1, "La marca es requerida"),
-  modelo: z.string().min(1, "El modelo es requerido"),
-  anio: z.string().min(4, "El año debe tener 4 dígitos"),
-  patente: z.string().optional(),
-  cobertura: z.string().min(1, "La cobertura es requerida"),
+  id_bien: z.number(), // Change to number instead of string
+  tipo_bien: z.string().default(""),
+  marca: z.string().default(""),
+  modelo: z.string().default(""),
+  anio: z.string().default(""),
+  patente: z.string().default(""),
+  cobertura: z.string().default(""),
   monto: z.string().min(1, "El monto es requerido"),
   adicionales: z.string().default("0"),
   accesorios: z.string().default("0"),
@@ -46,10 +40,11 @@ export function EditAssetForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id_bien: bien.id_bien, // Ensure this is a number
       tipo_bien: bien.tipo_bien || "Auto",
       marca: bien.marca,
       modelo: bien.modelo,
-      anio: bien.anio.toString(),
+      anio: bien.anio ? bien.anio.toString() : "",
       patente: bien.patente || "",
       cobertura: bien.cobertura,
       monto: bien.monto.toString(),
@@ -67,22 +62,14 @@ export function EditAssetForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Bien</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione el tipo de bien" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="4-AUTOS">Autos</SelectItem>
-                  <SelectItem value="MOTO">Motos</SelectItem>
-                  <SelectItem value="CASA">Casa</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <Input placeholder="Tipo de bien" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        <input type="hidden" {...form.register("id_bien")} />
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -145,18 +132,11 @@ export function EditAssetForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cobertura</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione la cobertura" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="D3">D3</SelectItem>
-                  <SelectItem value="C">C</SelectItem>
-                  <SelectItem value="B">B</SelectItem>
-                </SelectContent>
-              </Select>
+
+              <FormControl>
+                <Input placeholder="Cobertura" {...field} />
+              </FormControl>
+
               <FormMessage />
             </FormItem>
           )}
