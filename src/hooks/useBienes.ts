@@ -30,7 +30,6 @@ const useBienes = (dniClient: string) => {
       setError(null);
 
       const response = await apiService.getById("goods/:id", Number(dniClient));
-      console.log(response);
       if (response.ok) {
         setBienes(response.data || []);
       } else {

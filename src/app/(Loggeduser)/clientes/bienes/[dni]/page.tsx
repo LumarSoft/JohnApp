@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { Car, Plus, Pencil } from "lucide-react";
+import { Car, Plus, Pencil, Delete, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,6 +32,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CreateAssetForm } from "./components/create-asset-form";
 import { EditAssetForm } from "./components/edit-asset-form";
 import { apiService } from "@/services/querys";
+import { DeleteDialog } from "./components/delete";
+import { set } from "zod";
 
 export default function Bienes() {
   const params = useParams();
@@ -44,19 +46,32 @@ export default function Bienes() {
 
   const handleCreateAsset = async (values: any) => {
     try {
-      // Crear el objeto para enviarlo a la api
+      // Crear el objeto para enviarlo a la API
       const assetData = {
         ...values,
-        monto: parseFloat(values.monto),
-        anio: parseInt(values.anio),
-        adicionales: parseFloat(values.adicionales),
-        accesorios: parseFloat(values.accesorios),
+        monto: parseFloat(values.monto) || 0,
+        anio: values.anio ? parseInt(values.anio) : null, // Si está vacío, establece null
+        adicionales: parseFloat(values.adicionales) || 0,
+        accesorios: parseFloat(values.accesorios) || 0,
+        dni_asegurado: dni,
       };
-      console.log("Crear:", assetData);
 
       const result = await apiService.create("goods", assetData);
 
-      console.log("Resultado de la creación:", result);
+      if (result.statusCode === 201) {
+        const lastId =
+          bienes.length > 0
+            ? Math.max(...bienes.map((bien) => bien.id_bien))
+            : 0;
+        const newId = lastId + 1;
+
+        const newAsset = { ...assetData, id_bien: newId };
+
+        console.log(newAsset);
+        setBienes([...bienes, newAsset]);
+
+        setCreateDialogOpen(false);
+      }
     } catch (error) {
       console.error("Error al crear el bien:", error);
     }
@@ -66,19 +81,29 @@ export default function Bienes() {
     try {
       const assetData = {
         ...values,
-        tipo_bien: values.tipo_bien || "Auto",
-        monto: parseFloat(values.monto),
-        anio: parseInt(values.anio),
-        adicionales: parseFloat(values.adicionales),
-        accesorios: parseFloat(values.accesorios),
+        tipo_bien: values.tipo_bien || "",
+        monto: parseFloat(values.monto) || 0,
+        anio: values.anio ? parseInt(values.anio) : "",
+        adicionales: parseFloat(values.adicionales) || 0,
+        accesorios: parseFloat(values.accesorios) || 0,
+        id_bien: values.id_bien, // Explicitly include id_bien
       };
-      console.log("Editar:", assetData);
-      // const result = await apiService.update(
-      //   "goods/:id",
-      //   values.id_bien,
-      //   assetData
-      // );
-      // console.log("Resultado de la edición:", result);
+
+      const result = await apiService.update(
+        "goods/:id",
+        values.id_bien,
+        assetData
+      );
+
+      // Optional: Update the bienes state after successful update
+      if (result.statusCode === 200) {
+        const updatedBienes = bienes.map((bien) =>
+          bien.id_bien === values.id_bien ? { ...bien, ...assetData } : bien
+        );
+        setBienes(updatedBienes);
+        setEditDialogOpen(false);
+        setSelectedBien(null);
+      }
     } catch (error) {
       console.error("Error al editar el bien:", error);
     }
@@ -175,11 +200,12 @@ export default function Bienes() {
                       <TableCell className="text-right">
                         ${new Intl.NumberFormat().format(bien.monto)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="flex gap-2">
                         <Button size="sm" onClick={() => handleEditClick(bien)}>
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Editar bien</span>
                         </Button>
+                        <DeleteDialog bien={bien} setBienes={setBienes} />
                       </TableCell>
                     </TableRow>
                   ))}
