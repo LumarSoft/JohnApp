@@ -37,9 +37,7 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
+  const [globalFilter, setGlobalFilter] = React.useState<string>("");
 
   const table = useReactTable({
     data,
@@ -48,11 +46,21 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchValue = filterValue.trim().toLowerCase();
+      if (searchValue === "") return true;
+
+      const razonsocial =
+        row.getValue("nya_razonsocial")?.toString().toLowerCase() || "";
+      const dni = row.getValue("dni")?.toString().toLowerCase() || "";
+
+      return razonsocial.includes(searchValue) || dni.includes(searchValue);
+    },
+    onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
-      columnFilters,
+      globalFilter,
     },
   });
 
@@ -60,16 +68,9 @@ export function DataTable<TData, TValue>({
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filtrar por NOMBRE"
-          value={
-            (table.getColumn("nya_razonsocial")?.getFilterValue() as string) ??
-            ""
-          }
-          onChange={(event) =>
-            table
-              .getColumn("nya_razonsocial")
-              ?.setFilterValue(event.target.value)
-          }
+          placeholder="Buscar por NOMBRE o DNI"
+          value={globalFilter}
+          onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
       </div>
@@ -116,7 +117,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No se encontraron resultados.
                 </TableCell>
               </TableRow>
             )}
