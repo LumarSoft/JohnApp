@@ -6,8 +6,8 @@ export interface IPoliza {
   articulo: string;
   descripcion: string;
   rama: string;
-  date_from: Date;
-  date_to: Date;
+  date_from: Date ;
+  date_to: Date ;
 }
 
 const usePolizas = (dniClient: string, isDialogOpen: boolean) => {
@@ -26,6 +26,7 @@ const usePolizas = (dniClient: string, isDialogOpen: boolean) => {
         "policies/:id",
         Number(dniClient)
       );
+      console.log(response.data);
       if (response.ok) {
         setPolizas(response.data || []);
       } else {
