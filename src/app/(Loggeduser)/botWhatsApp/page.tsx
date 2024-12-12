@@ -30,7 +30,7 @@ export default function BotWhatsAppPage() {
     null
   );
 
-  const url = ""; // Tu URL de generación de QR
+  const url = "http://localhost:3008/"; // Tu URL de generación de QR
 
   const fetchQr = async (url: string) => {
     try {
@@ -67,14 +67,24 @@ export default function BotWhatsAppPage() {
   }, []);
 
   const handleRestart = async () => {
+    const response = await fetch("http://localhost:3008/restart", {
+      method: "GET",
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+        "Content-Type": "application/json",
+      },
+    });
+
     toast({
-      title: "🔄 Reiniciando Bot",
-      description: "Iniciando proceso de reinicio del Bot de WhatsApp",
+      title: "🔄 Bot Reiniciado",
+      description: "El Bot de WhatsApp se ha iniciado el proceso de reinicio",
       variant: "default",
     });
 
-    // Aquí añadirías la lógica real de reinicio del bot
-    await fetchQr(url);
+    // Refresh QR code after a short delay
+    setTimeout(async () => {
+      await fetchQr(url);
+    }, 3000);
   };
 
   const getBadgeVariant = () => {

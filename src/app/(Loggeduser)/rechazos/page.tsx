@@ -2,18 +2,10 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Upload,
-  FileSpreadsheet,
-  Table,
-  ListChecks,
-  Download,
-  Trash2,
-} from "lucide-react";
+import { Upload, FileSpreadsheet, ListChecks } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +14,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import axios from "axios";
+import * as XLSX from "xlsx";
 
 // Definición de tipos
 interface ProcessedData {
@@ -31,19 +25,49 @@ interface ProcessedData {
 }
 
 export default function Rechazos() {
-  const [file, setFile] = useState<File | null>(null);
+  const [items, setItems] = useState<any[]>([]);
   const [processedData, setProcessedData] = useState<ProcessedData | null>(
     null
   );
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [file, setFile] = useState<File | null>(null); // Añadir estado para el archivo
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0] || null;
-    setFile(selectedFile);
+  const readExcel = (selectedFile: File) => {
+    if (!selectedFile) return;
+
+    setFile(selectedFile); // Guardar el archivo en el estado
+
+    const promise = new Promise<any[]>((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsArrayBuffer(selectedFile);
+
+      fileReader.onload = (e) => {
+        if (!e.target) return;
+
+        const bufferArray = e.target.result;
+        const wb = XLSX.read(bufferArray, { type: "buffer" });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+
+        const dataRange = XLSX.utils.decode_range("A4:Z1000");
+
+        const data = XLSX.utils.sheet_to_json(ws, { range: dataRange });
+
+        resolve(data);
+      };
+
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+
+    promise.then((d) => {
+      setItems(d);
+    });
   };
 
-  const handleSubmit = () => {
-    if (!file) {
+  const handleSubmit = async () => {
+    if (!items.length) {
       toast({
         title: "⚠️ Error",
         description: "Por favor, selecciona un archivo Excel",
@@ -52,45 +76,35 @@ export default function Rechazos() {
       return;
     }
 
-    // Simulación de procesamiento de archivo
-    const simulateUpload = () => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 20;
-        setUploadProgress(progress);
+    try {
+      // const response = await axios.post(
+      //   `http://localhost:3008/rechazos`,
+      //   items,
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
 
-        if (progress >= 100) {
-          clearInterval(interval);
-          setProcessedData({
-            totalRows: 250,
-            rejectedRows: 35,
-            processedDate: new Date().toLocaleString(),
-          });
+      // console.log(response);
+      console.log(items);
 
-          toast({
-            title: "✅ Procesamiento Completado",
-            description: `Archivo ${file.name} procesado exitosamente`,
-            variant: "default",
-          });
-        }
-      }, 500);
-    };
-
-    simulateUpload();
-  };
-
-  const handleDownload = () => {
-    toast({
-      title: "📥 Descarga",
-      description: "Descargando archivo de rechazos...",
-    });
-    // Aquí iría la lógica real de descarga
-  };
-
-  const handleReset = () => {
-    setFile(null);
-    setProcessedData(null);
-    setUploadProgress(0);
+      // Manejar la respuesta del servidor según sea necesario
+      toast({
+        title: "✔️ Éxito",
+        description: "Los datos se han enviado correctamente",
+        variant: "default",
+      });
+    } catch (error) {
+      // Manejar errores en la solicitud
+      console.error("Error al enviar los datos:", error);
+      toast({
+        title: "⚠️ Error",
+        description: "Por favor, selecciona un archivo Excel",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -112,7 +126,12 @@ export default function Rechazos() {
               type="file"
               accept=".xlsx, .xls"
               className="opacity-0 absolute top-0 left-0 w-full h-full cursor-pointer z-10"
-              onChange={handleFileChange}
+              onChange={(e) => {
+                const selectedFile = e.target.files && e.target.files[0];
+                if (selectedFile) {
+                  readExcel(selectedFile);
+                }
+              }}
             />
             <div className="border-2 border-dashed border-gray-300 p-8 rounded-lg text-center hover:border-yellow-400 transition-all duration-300">
               <div className="flex flex-col items-center space-y-4">
@@ -183,24 +202,6 @@ export default function Rechazos() {
               </DialogContent>
             </Dialog>
           </div>
-
-          {processedData && (
-            <div className="flex space-x-4">
-              <Button
-                onClick={handleDownload}
-                className="w-full bg-green-500 text-white hover:bg-green-600"
-              >
-                <Download className="mr-2" /> Descargar Resultados
-              </Button>
-              <Button
-                onClick={handleReset}
-                variant="destructive"
-                className="w-full"
-              >
-                <Trash2 className="mr-2" /> Reiniciar
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
 
