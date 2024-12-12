@@ -19,7 +19,7 @@ import useUsuarios from "@/hooks/useUsuarios"; // Asegúrate de importar el hook
 import ChangeState from "./components/Dialog/ChangeState";
 
 export default function Usuarios() {
-  const { usuarios, loading, error } = useUsuarios(); // Llamamos al hook
+  const { usuarios, loading, error, setUsuarios } = useUsuarios(); // Llamamos al hook
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Función para filtrar usuarios
@@ -89,8 +89,8 @@ export default function Usuarios() {
                     </Badge>
                   </TableCell>
                   <TableCell className="space-x-2">
-                    <DeleteUser />
-                    <ChangeState />
+                    <DeleteUser user={usuario}/>
+                    <ChangeState user={usuario} />
                   </TableCell>
                 </TableRow>
               ))}

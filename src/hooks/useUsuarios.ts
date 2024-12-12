@@ -2,7 +2,7 @@ import { apiService } from "@/services/querys";
 import { useState, useEffect } from "react";
 
 // Definición de tipo para los usuarios
-interface Usuario {
+export interface Usuario {
   id: number;
   nombre: string;
   correo: string;
@@ -33,7 +33,7 @@ const useUsuarios = () => {
     fetchUsuarios();
   }, []);
 
-  return { usuarios, loading, error };
+  return { usuarios, loading, error, setUsuarios };
 };
 
 export default useUsuarios;

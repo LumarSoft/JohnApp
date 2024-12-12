@@ -10,9 +10,22 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Usuario } from "@/hooks/useUsuarios";
+import { apiService } from "@/services/querys";
 import { Trash } from "lucide-react";
 
-const DeleteUser = () => {
+const DeleteUser = ({ user }: { user: Usuario }) => {
+  const handleDelete = async () => {
+    try {
+      const result = await apiService.delete("users/:id", user.id);
+      if (result.statusCode === 200) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -29,7 +42,9 @@ const DeleteUser = () => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction>Continuar</AlertDialogAction>
+          <AlertDialogAction onClick={handleDelete}>
+            Continuar
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -10,9 +10,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Usuario } from "@/hooks/useUsuarios";
+import { apiService } from "@/services/querys";
 import { RefreshCcw } from "lucide-react";
 
-const ChangeState = () => {
+const ChangeState = ({ user }: { user: Usuario }) => {
+  const handleStateChange = async () => {
+    try {
+      const result = await apiService.update("users/state/:id", user.id, {
+        estado: user.estado === "Activo" ? "Inactivo" : "Activo",
+      });
+      if (result.statusCode === 200) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <AlertDialog>
       <AlertDialogTrigger>
@@ -31,7 +46,9 @@ const ChangeState = () => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction>Continuar</AlertDialogAction>
+          <AlertDialogAction onClick={handleStateChange}>
+            Continuar
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
