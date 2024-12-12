@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ICliente } from "@/hooks/useClientes";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Car } from "lucide-react";
-import BienesDialog from "../Dialogs/BienesDialog";
 import DatosDialog from "../Dialogs/DatosDialog";
 import PolizasDialog from "../Dialogs/PolizasDialog";
 import EstadoDialog from "../Dialogs/EstadoDialog";

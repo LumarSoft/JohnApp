@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ICliente } from "@/hooks/useClientes";
+import { apiService } from "@/services/querys";
 import { Label } from "@radix-ui/react-label";
 import { Eye } from "lucide-react";
 import React, { useState } from "react";
@@ -28,7 +29,31 @@ const DatosDialog = ({
   const [direccion, setDireccion] = useState(clientData.direccion);
   const [agenda, setAgenda] = useState(clientData.agenda);
 
-  const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {};
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Primero armamos el objeto con los datos que se pueden actualizar
+    const updatedItem = {
+      nya_razonsocial: nombre,
+      celular,
+      email,
+      direccion: direccion ? direccion : "",
+      agenda: agenda ? agenda : "",
+    };
+
+    try {
+      const result = await apiService.update(
+        "clients/:id",
+        Number(clientData.dni),
+        updatedItem
+      );
+      if (result.statusCode === 200) {
+        onDataUpdate({ ...clientData, ...updatedItem });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <Dialog>
