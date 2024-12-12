@@ -31,7 +31,6 @@ const PolizasDialog = ({ clienteData }: { clienteData: ICliente }) => {
     setSelectedPoliza(selected || null);
   };
 
-  console.log(selectedPoliza);
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>

@@ -2,6 +2,7 @@
 import useClientes, { ICliente } from "@/hooks/useClientes";
 import { createColumns } from "./components/Table/columns";
 import { DataTable } from "./components/Table/DataTable";
+import NuevoDialog from "./components/Dialogs/NuevoDialog";
 
 export default function Clientes() {
   const { clientes, error, loading, setClientes } = useClientes();
@@ -20,6 +21,7 @@ export default function Clientes() {
       <h1 className="text-5xl font-bold text-yellow-400 tracking-tight text-center">
         CLIENTES
       </h1>
+      <NuevoDialog setClientes={setClientes} />
       <DataTable columns={columns} data={clientes} />
     </div>
   );
