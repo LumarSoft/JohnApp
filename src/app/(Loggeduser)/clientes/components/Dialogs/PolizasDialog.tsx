@@ -31,6 +31,7 @@ const PolizasDialog = ({ clienteData }: { clienteData: ICliente }) => {
     setSelectedPoliza(selected || null);
   };
 
+  console.log(selectedPoliza);
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
@@ -70,12 +71,22 @@ const PolizasDialog = ({ clienteData }: { clienteData: ICliente }) => {
 
             <Label>Fecha desde</Label>
             <Input
-              value={selectedPoliza?.date_from?.toLocaleDateString() || ""}
+              value={
+                selectedPoliza?.date_from
+                  ? new Date(selectedPoliza.date_from).toLocaleDateString(
+                      "es-ES"
+                    )
+                  : ""
+              }
               readOnly
             />
             <Label>Fecha hasta</Label>
             <Input
-              value={selectedPoliza?.date_to?.toLocaleDateString() || ""}
+              value={
+                selectedPoliza?.date_to
+                  ? new Date(selectedPoliza.date_to).toLocaleDateString("es-ES")
+                  : ""
+              }
               readOnly
             />
 
