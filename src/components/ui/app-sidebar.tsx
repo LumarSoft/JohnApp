@@ -1,4 +1,4 @@
-import { Home, Users, CircleX, User } from "lucide-react";
+import { Home, Users, CircleX, User,ArrowUpToLine } from "lucide-react";
 
 import {
   Sidebar,
@@ -35,6 +35,11 @@ const items = [
     title: "Usuarios",
     url: "/usuarios",
     icon: User,
+  },
+  {
+    title: "Cargas masivas",
+    url: "/cargas",
+    icon: ArrowUpToLine,
   },
 ];
 

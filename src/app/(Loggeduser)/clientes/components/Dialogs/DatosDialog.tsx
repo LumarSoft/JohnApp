@@ -29,6 +29,7 @@ const DatosDialog = ({
   const [agenda, setAgenda] = useState(clientData.agenda);
 
   const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {};
+
   return (
     <Dialog>
       <DialogTrigger asChild>
