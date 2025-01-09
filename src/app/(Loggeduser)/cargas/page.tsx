@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Upload, FileSpreadsheet, ListChecks } from "lucide-react";
 import * as XLSX from 'xlsx';
 
 export default function Charges() {
@@ -66,7 +67,7 @@ export default function Charges() {
 
       const result = await response.json();
       alert('Datos cargados correctamente');
-      
+
       event.target.reset();
       setSelectedFile(null);
     } catch (error) {
@@ -87,7 +88,7 @@ export default function Charges() {
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
-          
+
           console.log('Datos convertidos:', jsonData); // Para debug
           resolve(jsonData);
         } catch (error) {
@@ -120,13 +121,24 @@ export default function Charges() {
             <form onSubmit={handleSubmit}>
               <div className="grid w-full max-w-sm items-center gap-1.5">
                 <Label htmlFor="policyFile">Archivo de Pólizas</Label>
-                <Input
-                  id="policyFile"
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleFileSelect}
-                  disabled={loading}
-                />
+                <div className="relative">
+                  <Input
+                    type="file"
+                    accept=".xlsx, .xls"
+                    className="opacity-0 absolute top-0 left-0 w-full h-full cursor-pointer z-10"
+                    onChange={(event) => handleFileSelect(event as FileSelectEvent)} // Delegar a handleFileSelect
+                  />
+                  <div className="border-2 border-dashed border-gray-300 p-8 rounded-lg text-center hover:border-yellow-400 transition-all duration-300">
+                    <div className="flex flex-col items-center space-y-4">
+                      <FileSpreadsheet className="w-16 h-16 text-gray-400" />
+                      <p className="text-md text-gray-600">
+                        {selectedFile
+                          ? `Archivo seleccionado: ${selectedFile.name}`
+                          : "Arrastra y suelta tu archivo Excel o haz clic para seleccionar"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
               <Button
                 className="mt-4 mr-2"
