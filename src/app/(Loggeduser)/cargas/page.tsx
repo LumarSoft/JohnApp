@@ -27,6 +27,13 @@ export default function Charges() {
     setSelectedFile(file);
   };
 
+  const handleDownloadExcel = (): void => {
+    const link = document.createElement('a');
+    link.href = '/MODELO-EXCEL-FINAL.xlsx';
+    link.download = 'MODELO-EXCEL-FINAL.xlsx';
+    link.click();
+  }
+
   interface FormEvent extends React.FormEvent<HTMLFormElement> {
     target: HTMLFormElement & { reset: () => void };
   }
@@ -122,11 +129,18 @@ export default function Charges() {
                 />
               </div>
               <Button
-                className="mt-4"
+                className="mt-4 mr-2"
                 type="submit"
                 disabled={loading}
               >
                 {loading ? 'Cargando...' : 'Cargar Pólizas'}
+              </Button>
+              <Button
+                className="mt-4 ml-2"
+                onClick={handleDownloadExcel}
+                type="button"
+              >
+                Descargar Excel Modelo
               </Button>
             </form>
           </CardContent>
