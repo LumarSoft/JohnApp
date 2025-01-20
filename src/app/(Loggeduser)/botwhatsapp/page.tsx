@@ -20,20 +20,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-type BotStatus = "disconnected" | "connecting" | "connected";
+type BotStatus = "disconnected" | "connecting" | "connected" | "restarting";
 
 export default function BotWhatsAppPage() {
   const [qrImageUrl, setQrImageUrl] = useState<null | string>(null);
   const [botStatus, setBotStatus] = useState<BotStatus>("disconnected");
   const [connectionAttempts, setConnectionAttempts] = useState(0);
-  const [lastConnectionTime, setLastConnectionTime] = useState<Date | null>(
-    null
-  );
+  const [lastConnectionTime, setLastConnectionTime] = useState<Date | null>(null);
+  const [isRestarting, setIsRestarting] = useState(false);
 
-  const url = "http://localhost:3008/"; // Tu URL de generación de QR
+  const url = "http://localhost:3008/";
 
   const fetchQr = async (url: string) => {
     try {
+      if (isRestarting) return; // No intentar fetchear durante el reinicio
+
       setBotStatus("connecting");
       const response = await fetch(url, {
         method: "GET",
@@ -49,10 +50,12 @@ export default function BotWhatsAppPage() {
         setBotStatus("connected");
       } else {
         setBotStatus("disconnected");
+        setQrImageUrl(null);
         console.error("Error al obtener la imagen:", response.statusText);
       }
     } catch (error) {
       setBotStatus("disconnected");
+      setQrImageUrl(null);
       console.error("Error en la solicitud:", error);
     }
   };
@@ -60,31 +63,80 @@ export default function BotWhatsAppPage() {
   useEffect(() => {
     fetchQr(url);
     const interval = setInterval(() => {
-      fetchQr(url);
+      if (!isRestarting) {
+        fetchQr(url);
+      }
     }, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isRestarting]);
 
   const handleRestart = async () => {
-    const response = await fetch("http://localhost:3008/restart", {
-      method: "GET",
-      headers: {
-        "ngrok-skip-browser-warning": "69420",
-        "Content-Type": "application/json",
-      },
-    });
+    try {
+      setIsRestarting(true);
+      setBotStatus("restarting");
+      setQrImageUrl(null);
 
-    toast({
-      title: "🔄 Bot Reiniciado",
-      description: "El Bot de WhatsApp se ha iniciado el proceso de reinicio",
-      variant: "default",
-    });
+      toast({
+        title: "🔄 Reiniciando Bot",
+        description: "El Bot de WhatsApp está reiniciándose...",
+        variant: "default",
+      });
 
-    // Refresh QR code after a short delay
-    setTimeout(async () => {
-      await fetchQr(url);
-    }, 3000);
+      // Intentar reiniciar el bot
+      await fetch("http://localhost:3008/restart", {
+        method: "GET",
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          "Content-Type": "application/json",
+        },
+      }).catch(() => {
+        // Ignoramos el error de conexión reset ya que es esperado
+      });
+
+      // Esperar a que el servidor se reinicie
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      // Intentar reconectar varias veces
+      let attempts = 0;
+      const maxAttempts = 5;
+      const attemptReconnect = async () => {
+        try {
+          if (attempts >= maxAttempts) {
+            throw new Error("Max attempts reached");
+          }
+          
+          await fetchQr(url);
+          setIsRestarting(false);
+          
+          toast({
+            title: "✅ Bot Reiniciado",
+            description: "El Bot se ha reiniciado exitosamente",
+            variant: "default",
+          });
+        } catch (error) {
+          attempts++;
+          if (attempts < maxAttempts) {
+            setTimeout(attemptReconnect, 2000);
+          } else {
+            setIsRestarting(false);
+            setBotStatus("disconnected");
+            toast({
+              title: "❌ Error al Reiniciar",
+              description: "No se pudo reconectar con el bot. Intente nuevamente.",
+              variant: "destructive",
+            });
+          }
+        }
+      };
+
+      setTimeout(attemptReconnect, 5000);
+
+    } catch (error) {
+      setIsRestarting(false);
+      setBotStatus("disconnected");
+      console.error("Error during restart:", error);
+    }
   };
 
   const getBadgeVariant = () => {
@@ -93,8 +145,23 @@ export default function BotWhatsAppPage() {
         return "default";
       case "connecting":
         return "outline";
+      case "restarting":
+        return "secondary";
       case "disconnected":
         return "destructive";
+    }
+  };
+
+  const getStatusText = () => {
+    switch (botStatus) {
+      case "connected":
+        return "Conectado";
+      case "connecting":
+        return "Conectando";
+      case "restarting":
+        return "Reiniciando";
+      case "disconnected":
+        return "Desconectado";
     }
   };
 
@@ -113,13 +180,7 @@ export default function BotWhatsAppPage() {
             <QrCode className="w-8 h-8 text-green-500" />
             <span>Estado del Bot</span>
           </CardTitle>
-          <Badge variant={getBadgeVariant()}>
-            {botStatus === "connected"
-              ? "Conectado"
-              : botStatus === "connecting"
-              ? "Conectando"
-              : "Desconectado"}
-          </Badge>
+          <Badge variant={getBadgeVariant()}>{getStatusText()}</Badge>
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -136,7 +197,7 @@ export default function BotWhatsAppPage() {
               <div className="flex flex-col items-center space-y-4 text-red-500">
                 <AlertTriangle className="w-16 h-16" />
                 <span className="text-lg font-semibold">
-                  No se ha podido generar el QR
+                  {isRestarting ? "Reiniciando bot..." : "No se ha podido generar el QR"}
                 </span>
               </div>
             )}
@@ -146,8 +207,10 @@ export default function BotWhatsAppPage() {
             <Button
               onClick={handleRestart}
               className="bg-yellow-400 text-black hover:bg-yellow-500 transition-colors"
+              disabled={isRestarting}
             >
-              <RefreshCcw className="mr-2" /> Reiniciar Bot
+              <RefreshCcw className={`mr-2 ${isRestarting ? 'animate-spin' : ''}`} />
+              {isRestarting ? 'Reiniciando...' : 'Reiniciar Bot'}
             </Button>
 
             <Dialog>
@@ -163,7 +226,7 @@ export default function BotWhatsAppPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span>Estado Actual:</span>
-                    <Badge variant={getBadgeVariant()}>{botStatus}</Badge>
+                    <Badge variant={getBadgeVariant()}>{getStatusText()}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Intentos de Conexión:</span>
